@@ -48,6 +48,17 @@ def amain(path):
     loop.close()
 
 
+def get_unprocessed_stmt(pgm_):
+    stmt = sa.select(dal.File.__table__.c.id, dal.File.__table__.c.path, dal.File.__table__.c.folder).where(
+        sa.not_(
+            dal.File.__table__.c.id.in_(
+                sa.select(dal.Status.__table__.c.file).where(dal.Status.__table__.c.program==pgm_)
+            )
+        )
+    ).subquery()
+    return stmt
+
+    
 # Main CLI
 # ========
 
@@ -61,12 +72,16 @@ def cli():
 @click.argument("pgm")
 def run(pgm):
     click.echo(f"Running {pgm}")
-    ses = dal.get_session()
-    result = ses.query(dal.Program).filter(dal.Program.id==pgm)
-    print(f"rowcount:{result.count()}")
-    for row in result:
-       print (row)
+    
+    stmt = get_unprocessed_stmt(pgm)
+    with dal.get_engine().connect() as con:
+        res = con.execute(sa.select(stmt))
+        print(f"rowcount:{res.rowcount}")
+        for row in res:
+           print(f"folder:{row[0]}, count:{row[1]}")
 
+
+    
 @click.command()
 @click.argument("pgm")
 def add(pgm):
@@ -110,14 +125,7 @@ def status(pgm):
 
 
     print("\n--- Unprocessed files ---")    
-    stmt = sa.select(dal.File.__table__.c.id, dal.File.__table__.c.path, dal.File.__table__.c.folder).where(
-        sa.not_(
-            dal.File.__table__.c.id.in_(
-                sa.select(dal.Status.__table__.c.file).where(dal.Status.__table__.c.program==pgm)
-            )
-        )
-    ).subquery()
-
+    stmt = get_unprocessed_stmt(pgm)
     with dal.get_engine().connect() as con:
         res = con.execute(sa.select(stmt.c.folder, sa.func.count(stmt.c.id)).group_by(stmt.c.folder))
         print(f"rowcount:{res.rowcount}")
