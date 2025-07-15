@@ -1,0 +1,79 @@
+# Intro
+
+****This is work in progress***
+
+
+# Create Database
+
+edit `create.py` and select an engine (sqlite|postgres|etc). SqlAlchemy support many Databases, see 
+https://docs.sqlalchemy.org/en/20/core/engines.html
+
+Create the database/schema/user etc in the database (if necessary).
+
+do: `python3 create.py` and make sure there are no errors.
+
+
+## Setup Postgres DB
+
+There is https://postgresapp.com/ for macOS!
+
+Create database, schema and user 'fileproc'.
+
+```
+create database fileproc;
+create user fileproc with encrypted password 'fileproc';
+ALTER DATABASE fileproc OWNER TO fileproc;
+
+# exit and connect to new db
+create schema fileproc;
+GRANT ALL PRIVILEGES ON SCHEMA fileproc TO fileproc;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA fileproc TO fileproc;
+```
+
+Dropping tables via con.execute dont seam to work in Postgres:
+
+```
+cat <<EOF|psql -Ufileproc -Pfileproc  # have not tested this
+drop table if exists file;
+drop table if exists program;
+drop table if exists status;
+EOF
+```
+
+
+# asyncio
+
+```
+python3 -m asyncio
+
+await asyncio.sleep(5, result='hello')
+
+
+from aio_databases import Database
+db = Database('sqlite:///fileproc.sqlite')
+#db = Database('asyncpg+pool://fileproc:fileproc@localhost:5432/filepro')
+
+await db.connect()
+
+async for rec in db.iterate('select * from file'):
+    print(rec)
+
+await db.disconnect()
+```
+
+## introspection
+
+This comes in v3.14: `python3 -m asyncio ps|pstree <PID>`. Release is planned for 251001. Pre-release don't work in macOS (entitlement issue),
+have not tested in Linux.
+
+
+## install
+
+```
+pip3 install aio-databases aiorun asyncclick click colorama uvloop
+pip3 install aiosqlite asyncpg
+
+# this don't work
+pip3 install aio-databases[aiosqlite]
+pip3 install aio-databases[asyncpg]
+```
