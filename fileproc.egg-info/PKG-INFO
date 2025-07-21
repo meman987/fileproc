@@ -1,0 +1,30 @@
+Metadata-Version: 2.4
+Name: fileproc
+Version: 2025.0.1
+Summary: Keep track of python programs processing (massive amounts of) files.
+Author: Meman987
+Author-email: b5a42927@gmail.com
+Maintainer-email: Meman987 <b5a42927@gmail.com>
+Project-URL: Repository, https://github.com/meman987/fileproc.git
+Keywords: file management
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Requires-Python: >=3.8.5
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: SQLAlchemy
+Requires-Dist: polars
+Dynamic: license-file
+
+# Intro
+
+***This is work in progress***
+
+Keep track of python programs processing (massive amounts of) files.
+Built using asyncio for processing PCAP-files, but can be used for
+any type of file.
+
+
+## Development
+
+Dependecies: `pip3 install build twine`
